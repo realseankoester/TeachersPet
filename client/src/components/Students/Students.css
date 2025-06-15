@@ -1,0 +1,109 @@
+.student-list-container, .student-form-container, .student-details-container {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.student-list-container h2, .student-form-container h2, .student-details-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.student-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.student-table th, .student-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.student-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.student-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.student-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.student-table .btn {
+    margin-right: 5px;
+}
+
+/* Student Form Styles */
+.student-form .form-group {
+    margin-bottom: 15px;
+}
+
+.student-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.student-form input[type="text"],
+.student-form input[type="date"],
+.student-form input[type="number"],
+.student-form select,
+.student-form textarea {
+    width: calc(100% - 22px); /* Adjust for padding and border */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.student-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.student-form .btn {
+    margin-top: 15px;
+}
+
+.student-form .btn-secondary {
+    margin-left: 10px;
+}
+
+/* Student Details Styles */
+.student-details-container {
+    max-width: 600px;
+    margin: 50px auto;
+}
+
+.student-details-container .detail-item {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #eee;
+}
+
+.student-details-container .detail-item:last-child {
+    border-bottom: none;
+}
+
+.student-details-container .detail-item strong {
+    color: #555;
+    display: inline-block;
+    width: 180px; /* Align labels */
+}
+
+.student-details-container .detail-actions {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.student-details-container .detail-actions .btn {
+    margin: 0 10px;
+}

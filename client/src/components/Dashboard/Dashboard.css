@@ -1,0 +1,121 @@
+/* src/components/Dashboard/Dashboard.css */
+.dashboard-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dashboard-container h1 {
+    color: #333;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.summary-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+
+.card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.card h3 {
+    color: #007bff;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.card p {
+    font-size: 2em;
+    font-weight: bold;
+    color: #555;
+}
+
+.dashboard-loading, .dashboard-error {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2em;
+    color: #666;
+}
+
+.dashboard-error {
+    color: red;
+}
+
+.summary-cards .card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+}
+
+.summary-cards .card h3 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.summary-cards .card p {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #007bff
+}
+
+.chart-section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+    height: 350 px;
+}
+
+.chart-section h3 {
+    color: #495057;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.recharts-bar-rectangle {
+    fill: #8884d8 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .summary-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+    .card {
+        width: 90%;
+        max-width: none;
+    }
+    .summary-cards .card {
+        width: 90%;
+        min-width: unset; 
+    }
+    .dashboard-container {
+        padding: 15px;
+    }
+    .chart-section {
+        padding: 15px;
+    }
+}
+
