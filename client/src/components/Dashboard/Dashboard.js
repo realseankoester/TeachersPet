@@ -29,11 +29,11 @@ const Dashboard = () => {
                 });
                 setTeacherName(userRes.data.username);
 
-                const studentsRes = await axios.get('/api/students', {
+                const studentsRes = await axios.get('/api/students?limit=10000', {
                     headers: { 'x-auth-token': token }
                 });
-                setStudents(studentsRes.data);
-                console.log('Fetched students data:', studentsRes.data);
+                setStudents(studentsRes.data.students);
+                console.log('Fetched students data:', studentsRes.data.students);
             } catch (err) {
                 console.error('Error fetching students for dashboard:', err.response ? err.response.data : err.message);
                 if (err.response && err.response.status === 401) {

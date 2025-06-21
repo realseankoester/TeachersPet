@@ -4,8 +4,7 @@ import axios from 'axios';
 import './Students.css';
 
 const StudentList = () => {
-    const [allStudents, setAllStudents] = useState([]);
-    const [filteredStudents, setFilteredStudents] = useState([]);
+    const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -13,8 +12,12 @@ const StudentList = () => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [filterGradeLevel, setFilterGradeLevel] = useState('');
-
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [studentsPerPage, setStudentsPerPage] = useState(10); // Default items per page
+    const [totalStudents, setTotalStudents] = useState(0); // Total count from backend
+    const [totalPages, setTotalPages] = useState(0); // Calculated total pages
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -28,7 +31,7 @@ const StudentList = () => {
 
     useEffect(() => {
     
-        const fetchAllStudents = async () => {
+        const fetchStudents = async () => {
             setLoading(true);
             setError('');
 
@@ -40,14 +43,29 @@ const StudentList = () => {
             }
 
             try {
-                const res = await axios.get('/api/students', {
+               const queryParams = new URLSearchParams();
+               if (debouncedSearchTerm) {
+                    queryParams.append('search', debouncedSearchTerm);
+               }
+               if(filterGradeLevel) {
+                    queryParams.append('grade', filterGradeLevel);
+               }
+                    queryParams.append('page', currentPage);
+                    queryParams.append('limit', studentsPerPage);
+
+               const res = await axios.get(`/api/students?${queryParams.toString()}`, {
                     headers: {
                         'x-auth-token': token,
                     },
-                });
-                setAllStudents(res.data);
+               });
+
+               setStudents(res.data.students);
+
+               setTotalStudents(res.data.totalStudents);
+               setTotalPages(res.data.totalPages);
+
             } catch (err) {
-                console.error('Error fetching all students:', err.resposne ? err.resposne.data : err.message);
+                console.error('Error fecthing students:', err.response ? err.response.data : err.message);
                 if (err.response && err.response.status === 401) {
                     navigate('/login');
                     localStorage.removeItem('token');
@@ -58,25 +76,21 @@ const StudentList = () => {
                 setLoading(false);
             }
         };
-        fetchAllStudents();
-    }, [navigate]);
+        fetchStudents();
+    }, [navigate, debouncedSearchTerm, filterGradeLevel, currentPage, studentsPerPage]);
 
-    useEffect(() => {
-        let currentFilteredStudents = [...allStudents];
-        if (debouncedSearchTerm) {
-            currentFilteredStudents = currentFilteredStudents.filter(student =>
-                student.first_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                student.last_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-            );
+    // Handle page change for pagination controls
+    const handlePageChange = (pageNumber) => {
+        if (pageNumber > 0 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
         }
+    };
 
-        if (filterGradeLevel) {
-            currentFilteredStudents = currentFilteredStudents.filter(student =>
-                parseInt(student.grade_level) === parseInt(filterGradeLevel)
-            );
-        }
-        setFilteredStudents(currentFilteredStudents);
-    }, [allStudents, debouncedSearchTerm, filterGradeLevel]);
+    // Handle students per page limit change
+    const handleStudentsPerPageChange = (e) => {
+        setStudentsPerPage(parseInt(e.target.value));
+        setCurrentPage(1); // Reset to first page when limit changes
+    }
 
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this student?')) {
@@ -91,8 +105,13 @@ const StudentList = () => {
                         'x-auth-token': token,
                     },
                 });
+
+                if (students.length === 1 && currentPage > 1) {
+                    setCurrentPage(prev => prev -1);
+                } else {
+                    setCurrentPage(prev => prev);  // Forces a re-render/re-fetch of current page
+                }
                 
-                setAllStudents(prevAllStudents => prevAllStudents.filter((student) => student.id !== id));
             } catch (err) {
                 console.error('Error deleting student:', err.response ? err.response.data : err.message);
                 if (err.response && err.response.status === 401) {
@@ -133,13 +152,32 @@ const StudentList = () => {
                     ))}
                 </select>
             </div>
-            {filteredStudents.length === 0 ? (
-                (allStudents.length === 0 && !searchTerm && !filterGradeLevel) ? (
-                    <p> No students found. Add your first student!</p>
+
+            {totalStudents > 0 && (
+                <div className="student-list-header">
+                    <div className="students-per-page">
+                        Show{' '}
+                        <select value={studentsPerPage} onChange={handleStudentsPerPageChange}>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>{' '}
+                        students per page
+                    </div>
+                    <div className="total-students-info">
+                        Showing {students.length} of {totalStudents} students
+                    </div>
+                </div>
+            )}
+
+            {students.length === 0 ? (
+                (totalStudents === 0 && !searchTerm && !filterGradeLevel) ? (
+                    <p>No students found. Add your first student!</p>
                 ) : (
                     <p>No students found matching your criteria.</p>
                 )
-            ) : (
+            ) : (   
                 <table className="student-table">
                     <thead>
                         <tr>
@@ -150,7 +188,7 @@ const StudentList = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredStudents.map((student) => (
+                        {students.map((student) => (
                             <tr key={student.id}>
                                 <td>{student.first_name} {student.last_name}</td>
                                 <td>{student.grade_level}</td>
@@ -165,6 +203,36 @@ const StudentList = () => {
                         ))}
                     </tbody>
                 </table>
+            )}
+
+            {totalPages > 1 && (
+                <div className="pagination-controls">
+                    <button
+                        onClick={() => handlePageChange(currentPage -1)}
+                        disabled={currentPage === 1}
+                        className="pagination-button"
+                    >
+                        Previous
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+                        <button
+                            key={pageNumber}
+                            onClick={() => handlePageChange(pageNumber)}
+                            className={`pagination-button ${currentPage === pageNumber ? 'active' : ''}`}
+                        >
+                            {pageNumber}
+                        </button>
+                    ))}
+
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="pagination-button"
+                    >
+                        Next
+                    </button>
+                </div>
             )}
         </div>
     );

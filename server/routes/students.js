@@ -29,42 +29,69 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
     const userId = req.user.id;
 
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 students per page
+    const offset = (page - 1) * limit; // Calculate the offset
+
     const { search, grade } = req.query;
 
     console.log('Backend received /api/students GET request:');
     console.log(' User ID:', userId);
     console.log(' Query Params (req.query):', req.query);
+    console.log(' Pagination: Page', page, ', Limit', limit, ', Offset', offset);
 
-    let query = 'SELECT * FROM students WHERE user_id = $1'
+    let baseQuery = 'FROM students WHERE user_id = $1'
     const queryParams = [userId];
 
     let paramIndex = 2;
 
     if (search) {
-        query += ` AND (first_name ILIKE $${paramIndex} OR last_name ILIKE $${paramIndex + 1})`;
+        baseQuery += ` AND (first_name ILIKE $${paramIndex} OR last_name ILIKE $${paramIndex + 1})`;
         queryParams.push(`%${search}%`);
         queryParams.push(`%${search}%`);
         paramIndex += 2
     }
 
     if (grade) {
-        query += ` AND grade_level = $${paramIndex}`;
+        baseQuery += ` AND grade_level = $${paramIndex}`;
         queryParams.push(grade);
         paramIndex++;
     }
 
-    query += ` ORDER BY last_name, first_name`;
-
-    console.log(' Constructed SQL Query:', query);
-    console.log(' SQL parameters:', queryParams);
-
     try {
-        const students = await pool.query(query, queryParams);
-        console.log(' Number of students found:', students.rows.length);
+        // Get total count of student matching the filters
+        const totalCountResult = await pool.query(`SELECT COUNT(*) ${baseQuery}`, queryParams);
+        const totalStudents = parseInt(totalCountResult.rows[0].count);
 
-        res.json(students.rows);
+        // Get paginated students
+        let paginatedQuery = `SELECT * ${baseQuery}`;
+        paginatedQuery += ` ORDER BY last_name, first_name`;
+        paginatedQuery += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+
+        queryParams.push(limit);
+        queryParams.push(offset);
+
+        console.log(' Constructed SQL Query for students:', paginatedQuery);
+        console.log(' SQL parameters for students:', queryParams);
+
+        const studentsResult = await pool.query(paginatedQuery, queryParams);
+        const students = studentsResult.rows;
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalStudents / limit);
+
+        console.log(' Number of students found (current page):', students.length);
+        console.log(' Total students(all pages, filtered):', totalStudents);
+        console.log(' Total pages:', totalPages);
+
+        res.json({
+            students: students,
+            currentPage: page,
+            totalPages: totalPages,
+            totalStudents: totalStudents
+        });
     } catch (err) {
-        console.error(err.message);
+        console.error('Error fetching students with pagination:', err.message)
         res.status(500).send('Server Error');
     }
 });
