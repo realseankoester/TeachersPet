@@ -7,6 +7,7 @@ import StudentForm from './components/Students/StudentForm';
 import StudentDetails from './components/Students/StudentDetails';
 import NavBar from './components/Layout/Navbar';
 import Dashboard from './components/Dashboard/Dashboard';
+import StudentImport from './components/Students/StudentImport';
 import './App.css';
 import axios from 'axios';
 
@@ -63,11 +64,13 @@ function App() {
           <Route path="/register" element={<Register onLogin={handleLogin} />} />
           {isAuthenticated ? (
             <>
-              <Route path="/" element={<StudentList />} />
+              <Route path="/" element={<Navigate to="/students" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/students" element={<StudentList />} />
               <Route path="/students/new" element={<StudentForm />} />
               <Route path="/students/edit/:id" element={<StudentForm />} />
               <Route path="/students/:id" element={<StudentDetails />} />
+              <Route path="/students/import" element={<StudentImport />} />
             </>
           ) : (
               <Route path="*" element={<Navigate to="/login" />} />
@@ -77,6 +80,5 @@ function App() {
     </Router>
   );
 }
-
 
 export default App;

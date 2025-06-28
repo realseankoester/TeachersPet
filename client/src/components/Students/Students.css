@@ -198,3 +198,24 @@
     color: #721c24;
     list-style-type: disc;
 }
+
+/* Container for action buttons (Add New, Import) */
+.student-list-actions {
+    display: flex; /* Arranges children (buttons) in a row */
+    gap: 10px; /* Adds space between buttons */
+    margin-bottom: 20px; /* Provides space below the button group */
+    align-items: center; /* Vertically aligns items if they have different heights */
+}
+
+/* Style for the Import Students button */
+.btn-info {
+    background-color: #17a2b8; /* A teal color, common for 'info' */
+    color: white;
+    border-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #138496;
+}
+

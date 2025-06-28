@@ -19,10 +19,6 @@ const StudentList = () => {
     const [totalStudents, setTotalStudents] = useState(0); // Total count from backend
     const [totalPages, setTotalPages] = useState(0); // Calculated total pages
 
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [importMessage, setImportMessage] = useState({ type: '', text: '', show: false });
-    const [failedImportRows, setFailedImportRows] = useState([]);
-
     const fetchStudents = useCallback(async () => {
         setLoading(true);
         setError('');
@@ -83,71 +79,6 @@ const StudentList = () => {
         fetchStudents ();
     }, [fetchStudents]);
 
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-    }
-
-    const handleImportSubmit = async (event) => {
-        event.preventDefault();
-
-        const token = localStorage.getItem('token');
-        if (!token) {
-            setImportMessage({ type: 'error', text: 'Authentication required. Please log in.', show: true });
-            navigate('/login');
-            return;
-        }
-
-        if (!selectedFile) {
-            setImportMessage({ type: 'error', text: 'Authentication required. Please log in.', show: true });
-            return;
-        }
-
-        if (selectedFile.type !== 'text/csv' && !selectedFile.name.endsWith('.csv')) {
-            setImportMessage({ type: 'error', text: 'Unsupported file type. Please upload a CSV (.csv) file.', show: true});
-            setSelectedFile(null); // Clear the file input
-            return;
-        }
-
-        setImportMessage({ type: 'partial-success', text: 'Uploading and processing file... Please wait.', show: true });
-        setFailedImportRows([]); // Clear previous results
-
-        try {
-            const formData = new FormData();
-            formData.append('studentFile', selectedFile);
-
-            const API_BASE_URL = '';
-
-            const res = await axios.post(`${API_BASE_URL}/api/students/import`, formData, {
-                headers: {
-                    'x-auth-token': token,
-                },
-            });
-
-            setImportMessage({ type: res.data.status, text: res.data.message, show: true });
-            if (res.data.failedRows && res.data.failedRows.length > 0) {
-                setFailedImportRows(res.data.failedRows);
-            } else {
-                setFailedImportRows([]);
-            }
-
-            fetchStudents();
-        } catch (err) {
-            console.error('Error during student import:', err.response ? err.response.data : err.message);
-            const errorMessage = err.response?.data?.msg || err.response?.data?.message || 'An unexpected error occured during import.';
-            setImportMessage({ type: 'error', text: `Import failed: ${errorMessage}`, show: true });
-            if (err.response?.data?.failedRows) {
-                setFailedImportRows(err.response.data.failedRows);
-            } else {
-                setFailedImportRows([]);
-            }
-            if (err.response && err.response.status === 401) {
-                navigate('/login');
-                localStorage.removeItem('token');
-            }
-        } finally {
-            setSelectedFile(null); // Clear the file input after submission
-        }
-    }
     // Handle page change for pagination controls
     const handlePageChange = (pageNumber) => {
         if (pageNumber > 0 && pageNumber <= totalPages) {
@@ -200,50 +131,16 @@ const StudentList = () => {
     return (
         <div className="student-list-container">
             <h2>Your Students</h2>
-            <Link to="/students/new" className="btn btn-primary mb-3">Add New Student</Link>
 
-            <div className="import-container">
-                <h2>Import Students from CSV</h2>
-                <form onSubmit={handleImportSubmit} className="import-form">
-                    <label htmlFor="studentFile">Upload CSV File:</label>
-                    <input
-                        type="file"
-                        id="studentFile"
-                        name="studentFile"
-                        accept=".csv"
-                        onChange={handleFileChange}
-                        required
-                    />
-                    <button type="submit">Import CSV</button>
-                </form>
-
-                {importMessage.show && (
-                    <div className={`message-area ${importMessage.type}`}>
-                        {importMessage.text}
-                    </div>
-                )}
-
-                {failedImportRows.length > 0 && (
-                    <div className="failed-rows-container">
-                        <h3>Failed Rows:</h3>
-                        <ul id="failedRowsList">
-                            {failedImportRows.map((row, index) => (
-                                <li key={index} className="failed-row-item">
-                                    <strong>Row {row.rowNumber}:</strong> {Object.entries(row.originalData)
-                                        .map(([key, value]) => `<span><strong>${key}:</strong> ${value || '[Empty]'}</span>`)
-                                        .join(', ')}
-                                    <ul>
-                                        {row.errors.map((error, errIndex) => (
-                                            <li key={errIndex}>{error}</li>
-                                        ))}
-                                    </ul>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+            <div className="student-list-actions">
+                <Link to="/students/new" className="btn btn-primary">Add New Student</Link>
+                <button
+                    onClick={() => navigate('/students/import')}
+                    className="btn btn-info"
+                >
+                    Import Students
+                </button>
             </div>
-
             <div className="filters-container mb-3 d-flex">
                 <input
                     type="text"
@@ -307,8 +204,8 @@ const StudentList = () => {
                                     ? parseFloat(student.average_grade).toFixed(2) : 'N/A'}</td>
                                 <td>
                                     <Link to={`/students/${student.id}`} className="btn btn-secondary btn-sm">View</Link>
-                                    <Link to={`/students/edit/${student.id}`} className="btn btn-info btn-sm ml-2">Edit</Link>
-                                    <button onClick={() => handleDelete(student.id)} className="btn btn-danger btn-sm ml-2">Delete</button>
+                                    <Link to={`/students/edit/${student.id}`} className="btn btn-info btn-sm">Edit</Link>
+                                    <button onClick={() => handleDelete(student.id)} className="btn btn-danger btn-sm">Delete</button>
                                 </td>
                             </tr>
                         ))}
