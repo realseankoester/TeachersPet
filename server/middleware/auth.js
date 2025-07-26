@@ -7,7 +7,7 @@ const auth = (req, res, next) => {
 
     if (!token) {
         console.log('AUTH MIDDLEWARE DEBUG: No token found! Request to: ', req.originalUrl);
-        return res.status(401).json({msg: 'Invalid token, authorization denied'})
+        return res.status(401).json({msg: 'No token, authorization denied'})
     }
 
     try {
