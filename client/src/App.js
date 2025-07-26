@@ -8,6 +8,10 @@ import StudentDetails from './components/Students/StudentDetails';
 import NavBar from './components/Layout/Navbar';
 import Dashboard from './components/Dashboard/Dashboard';
 import StudentImport from './components/Students/StudentImport';
+import ClassList from './components/Classes/ClassList';
+import ClassStudentList from './components/Classes/ClassStudentList';
+import ClassForm from './components/Classes/ClassForm';
+import AddStudentToClass from './components/Classes/AddStudentToClass';
 import './App.css';
 import axios from 'axios';
 
@@ -71,6 +75,11 @@ function App() {
               <Route path="/students/edit/:id" element={<StudentForm />} />
               <Route path="/students/:id" element={<StudentDetails />} />
               <Route path="/students/import" element={<StudentImport />} />
+              <Route path="/classes" element={<ClassList />} />
+              <Route path="/classes/:classId/students" element={<ClassStudentList />} />
+              <Route path="/classes/:classId/add-student" element={<AddStudentToClass />} />
+              <Route path="/classes/new" element={<ClassForm />} />
+              {/* <Route path="/classes/edit/:id" element={<ClassForm />} /> */}
             </>
           ) : (
               <Route path="*" element={<Navigate to="/login" />} />

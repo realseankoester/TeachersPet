@@ -24,9 +24,11 @@ pool.connect((err, client, done) => {
 
 const authRoutes = require('./routes/auth');
 const studentRoutes = require('./routes/students');
+const classRoutes = require('./routes/classes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
+app.use('/api/classes', classRoutes);
 
 app.get('/', (req, res) => {
     res.send('TeachersPet App Backend API');
@@ -38,5 +40,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-    console.log(`Sever running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });

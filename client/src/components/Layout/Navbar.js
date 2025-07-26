@@ -16,6 +16,9 @@ const Navbar = ({ isAuthenticated, onLogout }) => {
                             <Link to="/dashboard" className="nav-link">Dashboard</Link>
                         </li>
                         <li className="nav-item">
+                            <Link to="/classes" className="nav-link">Classes</Link>
+                        </li>
+                        <li className="nav-item">
                             <button onClick={onLogout} className="nav-link logout-btn">Logout</button>
                         </li>
                     </>
