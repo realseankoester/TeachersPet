@@ -1,0 +1,63 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20' # Use Node.js 20, or match your local dev version (e.g., '18', '20')
+        cache: 'npm'
+        cache-dependency-path: |
+          client/package-lock.json
+          backend/package-lock.json
+
+    # Frontend Tests
+    - name: Install Frontend Dependencies
+      run: |
+        cd client
+        npm ci # `npm ci` is recommended for CI to ensure clean installs
+      env:
+        CI: true # Essential for Create React App's react-scripts test command
+
+    - name: Run Frontend Tests
+      run: |
+        cd client
+        npm test -- --watchAll=false # `--watchAll=false` prevents Jest from running in watch mode
+      env:
+        CI: true # Essential for Create React App's react-scripts test command
+
+    # Backend Tests
+    - name: Install Backend Dependencies
+      run: |
+        cd backend
+        npm ci
+      
+    # - name: Wait for Postgres to be ready (if using service above)
+    #   if: always() # Runs even if previous steps fail, to ensure service logs are available
+    #   run: echo "Postgres service setup skipped or already ready based on test config"
+      # If you uncommented the 'postgres' service, you would typically add a wait step here, e.g.:
+      # run: sudo /usr/bin/pg_isready -h localhost -p 5432 -U test_user
+
+    - name: Run Backend Tests
+      run: |
+        cd backend
+        npm test
+      env:
+        NODE_ENV: test # Ensure your db.js uses this to skip connection
+        # If using the postgres service, uncomment these:
+        # DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
