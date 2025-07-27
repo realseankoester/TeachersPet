@@ -20,7 +20,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20' # Use Node.js 20, or match your local dev version (e.g., '18', '20')
+        node-version: '20' 
         cache: 'npm'
         cache-dependency-path: |
           client/package-lock.json
@@ -44,7 +44,7 @@ jobs:
     # Backend Tests
     - name: Install Backend Dependencies
       run: |
-        cd backend
+        cd server
         npm ci
       
     # - name: Wait for Postgres to be ready (if using service above)
@@ -55,7 +55,7 @@ jobs:
 
     - name: Run Backend Tests
       run: |
-        cd backend
+        cd server
         npm test
       env:
         NODE_ENV: test # Ensure your db.js uses this to skip connection
