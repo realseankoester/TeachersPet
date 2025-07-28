@@ -131,7 +131,7 @@ router.post(
     [
         // Validate that studentIds is an array and not empty
         check('studentIds', 'Student IDs are required and must be an array').isArray().notEmpty(),
-        // Optional: Add a custom validator to ensure all IDs in the array are integers
+        
         check('studentIds.*').isInt().withMessage('Each student ID must be an integer')
     ],
     async (req, res) => {
@@ -155,7 +155,7 @@ router.post(
                 return res.status(404).json({ msg: 'Class not found or unauthorized' });
             }
 
-            // 2. Optional: Verify that all provided studentIds belong to this teacher
+            // 2. Verify that all provided studentIds belong to this teacher
             // This prevents a teacher from adding other teachers' students to their class
             if (studentIds.length > 0) {
                 const studentCountResult = await pool.query(
@@ -177,7 +177,7 @@ router.post(
                 pool.query(
                     `INSERT INTO student_classes (student_id, class_id)
                      VALUES ($1, $2)
-                     ON CONFLICT (student_id, class_id) DO NOTHING RETURNING *`, // `DO NOTHING` prevents duplicate errors
+                     ON CONFLICT (student_id, class_id) DO NOTHING RETURNING *`,
                     [studentId, classId]
                 )
             );
@@ -224,7 +224,7 @@ router.delete(
                 return res.status(404).json({ msg: 'Class not found or unauthorized' });
             }
 
-            // 2. Optional: Verify the student also belongs to this teacher
+            // 2. Verify the student also belongs to this teacher
             const studentCheck = await pool.query(
                 'SELECT id FROM students WHERE id = $1 AND user_id = $2',
                 [studentId, teacherId]
@@ -275,8 +275,6 @@ router.delete('/:id', auth, async (req, res) => {
         await pool.query('BEGIN');
 
         // 2. Delete all student enrollments for this class
-        // This is crucial if you DO NOT have ON DELETE CASCADE set up in your DB schema.
-        // If you DO have ON DELETE CASCADE, this step is redundant but harmless.
         await pool.query('DELETE FROM student_classes WHERE class_id = $1', [id]);
 
         // 3. Delete the class itself
@@ -286,7 +284,6 @@ router.delete('/:id', auth, async (req, res) => {
         );
 
         if (deleteClassResult.rows.length === 0) {
-            // This case should ideally not be hit if classCheck passed, but good for robustness
             await pool.query('ROLLBACK');
             return res.status(404).json({ msg: 'Class not found or could not be deleted' });
         }

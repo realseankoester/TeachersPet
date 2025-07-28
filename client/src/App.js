@@ -42,7 +42,7 @@ function App() {
 
   const handleLogin = () => {
     setIsAuthenticated(true);
-    // After login, token is in localStorage, so set it for axios
+    
     const token = localStorage.getItem('token');
     if (token) {
       setAuthToken(token); // Set token for axios after successful login

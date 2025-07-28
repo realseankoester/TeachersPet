@@ -38,7 +38,7 @@ const ClassStudentList = () => {
     const handleRemoveStudent = async (studentId) => {
         if (window.confirm('Are you sure you want to remove this student from the class?')) {
             try {
-                // Send DELETE request to your backend
+                // Send DELETE request to backend
                 await axios.delete(`/api/classes/${classId}/students/${studentId}`);
                 // Filter out the deleted student from the local state
                 setStudents(students.filter(student => student.id !== studentId));

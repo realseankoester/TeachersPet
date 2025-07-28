@@ -20,7 +20,7 @@ const ClassList = () => {
                 setError('Failed to load classes. Please try again.');
                 setLoading(false);
             }
-            // Add code to address specific error codes
+            // TODO: Add code to address specific error codes
         };
         
     
